@@ -41,11 +41,9 @@ namespace Sorted.Service
 
                     var oJson = JsonConvert.DeserializeObject<dynamic>(oRestResponse.Content);
 
-                    //var oItems = oJson["items"];
+                    var oItems = oJson["items"];
 
-                    
-
-                    foreach (var item in oJson)
+                    foreach (var item in oItems)
                     {
                         RainfallReading oReading = new RainfallReading();
                         
