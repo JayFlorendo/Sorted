@@ -19,7 +19,7 @@ namespace Sorted.Service
 
         public RainfallService ()
         {
-            _restClient = new RestClient(_setting.Root);
+            _restClient = new RestClient($"http://environment.data.gov.uk/flood-monitoring/");
         }
 
         public async Task<RainfallReadingResponse> GetRainfallReading (int StationID)
@@ -28,7 +28,7 @@ namespace Sorted.Service
 
             try
             {
-                RestRequest oRestRequest = new RestRequest($"/rainfall/id/" + StationID + $"/readings", Method.Get);
+                RestRequest oRestRequest = new RestRequest($"/id/stations/" + StationID + $"/readings", Method.Get);
                 oRestRequest.AddHeader("Content-Type", "application/json");
 
                 RestResponse oRestResponse = await _restClient.ExecuteAsync(oRestRequest);
@@ -37,16 +37,21 @@ namespace Sorted.Service
                 {
                     var oJson = JsonConvert.DeserializeObject<dynamic>(oRestResponse.Content);
 
-                    
-                    foreach (var item in oJson)
+                    var oItems = oJson["items"];
+
+                    List<RainfallReading> oReadings = new List<RainfallReading>();
+
+                    foreach (var item in oItems)
                     {
                         RainfallReading oReading = new RainfallReading();
                         
                         oReading.DateMeasured = item["dateTime"].ToString();
                         oReading.AmountMeasured = Decimal.Parse(item["value"].ToString());
 
-                        oResponse.RainfallReadings.Add(oReading);
+                        oReadings.Add(oReading);
                     }
+
+                    oResponse.RainfallReadings = oReadings;
                 }
             }
             catch (Exception ex)

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Sorted.Interface
 {
-    public interface IRainfallService
+    public interface IRainfallService 
     {
         Task<RainfallReadingResponse> GetRainfallReading (int StationID);
     }
