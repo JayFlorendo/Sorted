@@ -1,3 +1,4 @@
+using API;
 using Microsoft.Extensions.Configuration;
 using Sorted.Interface;
 using Sorted.Service;
@@ -22,6 +23,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+    options.RoutePrefix = string.Empty;
+});
+
 
 app.UseHttpsRedirection();
 
@@ -30,3 +37,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+

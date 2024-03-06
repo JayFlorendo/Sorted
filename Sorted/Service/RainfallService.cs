@@ -7,6 +7,7 @@ using Sorted.Setting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -22,9 +23,9 @@ namespace Sorted.Service
             _restClient = new RestClient($"http://environment.data.gov.uk/flood-monitoring/");
         }
 
-        public async Task<RainfallReadingResponse> GetRainfallReading (int StationID)
+        public async Task<dynamic> GetRainfallReading (int StationID)
         {
-            RainfallReadingResponse oResponse = new RainfallReadingResponse ();
+            dynamic oResponse; 
 
             try
             {
@@ -32,16 +33,19 @@ namespace Sorted.Service
                 oRestRequest.AddHeader("Content-Type", "application/json");
 
                 RestResponse oRestResponse = await _restClient.ExecuteAsync(oRestRequest);
+                List<RainfallReading> oReadings = new List<RainfallReading>();
 
                 if (oRestResponse != null)
                 {
+                    
+
                     var oJson = JsonConvert.DeserializeObject<dynamic>(oRestResponse.Content);
 
-                    var oItems = oJson["items"];
+                    //var oItems = oJson["items"];
 
-                    List<RainfallReading> oReadings = new List<RainfallReading>();
+                    
 
-                    foreach (var item in oItems)
+                    foreach (var item in oJson)
                     {
                         RainfallReading oReading = new RainfallReading();
                         
@@ -51,12 +55,25 @@ namespace Sorted.Service
                         oReadings.Add(oReading);
                     }
 
-                    oResponse.RainfallReadings = oReadings;
+                    
                 }
+
+                oResponse = new RainfallReadingResponse();
+                oResponse.RainfallReadings = oReadings;
             }
             catch (Exception ex)
             {
-                
+
+                oResponse = new ErrorResponse();
+
+                List<ErrorDetail> oErrors = new List<ErrorDetail>();
+                ErrorDetail oError = new ErrorDetail();
+
+                oError.PropertyName = ex.Source.ToString();
+                oError.Message = ex.Message;
+                oErrors.Add(oError);
+
+                oResponse.Errors = oErrors;
             }
 
             return oResponse;
